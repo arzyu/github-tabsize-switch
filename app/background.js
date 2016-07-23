@@ -53,10 +53,6 @@ runtime.onInstalled.addListener(() => {
 storage.onChanged.addListener((changes) => {
   const newTabsize = changes.tabsize.newValue;
 
-  if (newTabsize === currentTabsize) {
-    return;
-  }
-
   setIcon(newTabsize, () => {
     tabs.query({active: true}, (matchedTabs) => {
       const tab = matchedTabs[0];
