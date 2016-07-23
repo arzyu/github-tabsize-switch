@@ -1,0 +1,16 @@
+{
+  "name": "github-tabsize-switch",
+  "devDependencies": {
+    "babel-eslint": "^6.1.2",
+    "eslint": "^3.1.1",
+    "eslint-config-presets": "github:arzyu/eslint-config-presets"
+  },
+  "eslintConfig": {
+    "extends": "presets/chrome"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arzyu/github-tabsize-switch"
+  },
+  "license": "MIT"
+}
