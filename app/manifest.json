@@ -17,14 +17,13 @@
     {
       "matches": [
         "https://github.com/*",
-        "https://*.github.com/*",
-        "https://*.githubusercontent.com/*"
+        "https://*.github.com/*"
       ],
       "js": ["content.js"],
       "run_at": "document_end",
       "all_frames": true
     }
   ],
-  "permissions": ["tabs", "storage"]
+  "permissions": ["activeTab", "storage"]
 }
 
