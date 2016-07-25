@@ -1,66 +1,93 @@
+const storage = chrome.storage;
 const runtime = chrome.runtime;
 const tabs = chrome.tabs;
-const storage = chrome.storage;
 const browserAction = chrome.browserAction;
 
 const githubPattern = /^https:\/\/(.+\.)*github\.com/;
 const tabsizeList = [2, 4, 8];
-let currentTabsize = 8;
+const DEFAULT_TABSIZE = 8;
 
-const setIcon = (tabsize, callback) => {
-  browserAction.setIcon({path: `assets/tabsize-${tabsize}.png`}, callback);
+let currentTabsize;
+
+const setIcon = (tabsize) => {
+  browserAction.setIcon({path: `assets/tabsize-${tabsize}.png`});
 };
 
 browserAction.onClicked.addListener((tab) => {
   const index = (tabsizeList.indexOf(currentTabsize) + 1) % tabsizeList.length;
   const tabsize = tabsizeList[index];
-  setIcon(tabsize, () => {
-    if (githubPattern.test(tab.url)) {
-      tabs.sendMessage(tab.id, tabsize);
-    }
-    currentTabsize = tabsize;
+
+  currentTabsize = tabsize;
+  setIcon(tabsize);
+
+  // need permission: `activeTab` for tab.url
+  if (githubPattern.test(tab.url)) {
+    tabs.connect(tab.id).postMessage(tabsize);
+  }
+
+  storage.local.set({tabsize}, () => {
     storage.sync.set({tabsize});
   });
 });
 
 tabs.onActivated.addListener((activeInfo) => {
   tabs.get(activeInfo.tabId, (tab) => {
+    // need permission: `activeTab` for tab.url
     if (githubPattern.test(tab.url)) {
-      tabs.sendMessage(tab.id, currentTabsize);
+      tabs.connect(tab.id).postMessage(currentTabsize);
     }
   });
 });
 
 runtime.onConnect.addListener((port) => {
-  const tab = port.sender.tab;
+  const sender = port.sender;
+  const tab = sender ? sender.tab : null;
+
+  port.disconnect();
+
   if (tab) {
-    tabs.sendMessage(tab.id, currentTabsize, () => {
-      port.disconnect();
-    });
+    tabs.connect(tab.id).postMessage(currentTabsize);
   }
 });
 
-runtime.onInstalled.addListener(() => {
-  storage.sync.get('tabsize', (data) => {
-    if (data.tabsize) {
-      currentTabsize = data.tabsize;
-    } else {
-      storage.sync.set({tabsize: 8});
-    }
-  });
-});
+storage.onChanged.addListener((changes, area) => {
+  if (!changes.tabsize) {
+    return;
+  }
 
-storage.onChanged.addListener((changes) => {
   const newTabsize = changes.tabsize.newValue;
 
-  setIcon(newTabsize, () => {
+  switch (area) {
+  case 'sync':
+    storage.local.set({tabsize: newTabsize});
+    break;
+
+  case 'local':
+    setIcon(newTabsize);
+
     tabs.query({active: true}, (matchedTabs) => {
-      const tab = matchedTabs[0];
-      if (githubPattern.test(tab.url)) {
-        tabs.sendMessage(tab.id, newTabsize);
-      }
+      matchedTabs.forEach((tab) => {
+        // need permission `tabs` for tab.url
+        if (tab && githubPattern.test(tab.url)) {
+          tabs.connect(tab.id).postMessage(newTabsize);
+        }
+      });
     });
-    currentTabsize = newTabsize;
-  });
+    break;
+
+  default:
+  }
+});
+
+storage.local.get('tabsize', (data) => {
+  let tabsize = data.tabsize;
+
+  if (!tabsize) {
+    tabsize = DEFAULT_TABSIZE;
+    storage.local.set({tabsize});
+  }
+
+  currentTabsize = tabsize;
+  setIcon(tabsize);
 });
 

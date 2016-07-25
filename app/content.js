@@ -27,11 +27,14 @@ const setTabsize = (tabsize) => {
   styleEl = newStyleEl;
 };
 
-runtime.onMessage.addListener((tabsize) => {
-  if (tabsize !== currentTabsize) {
-    currentTabsize = tabsize;
-    setTabsize(tabsize);
-  }
+runtime.onConnect.addListener((port) => {
+  port.onMessage.addListener((tabsize) => {
+    if (tabsize !== currentTabsize) {
+      currentTabsize = tabsize;
+      setTabsize(tabsize);
+    }
+    port.disconnect();
+  });
 });
 
 runtime.connect();
