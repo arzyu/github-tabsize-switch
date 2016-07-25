@@ -1,6 +1,5 @@
 const runtime = chrome.runtime;
 
-let currentTabsize;
 let styleEl;
 
 const setTabsize = (tabsize) => {
@@ -29,10 +28,7 @@ const setTabsize = (tabsize) => {
 
 runtime.onConnect.addListener((port) => {
   port.onMessage.addListener((tabsize) => {
-    if (tabsize !== currentTabsize) {
-      currentTabsize = tabsize;
-      setTabsize(tabsize);
-    }
+    setTabsize(tabsize);
     port.disconnect();
   });
 });
