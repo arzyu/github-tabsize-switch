@@ -5,6 +5,9 @@
     "eslint": "^3.1.1",
     "eslint-config-presets": "github:arzyu/eslint-config-presets"
   },
+  "scripts": {
+    "pack": "zip -r app.zip app -x app/assets/icon.svg *.swp"
+  },
   "eslintConfig": {
     "extends": "presets/chrome"
   },
