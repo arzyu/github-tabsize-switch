@@ -3,7 +3,7 @@ const runtime = chrome.runtime;
 const tabs = chrome.tabs;
 const browserAction = chrome.browserAction;
 
-const githubPattern = /^https:\/\/(.+\.)*github\.com/;
+const githubPattern = /^https:\/\/([^\.]+\.)*github\.com/;
 const tabsizeList = [2, 4, 8];
 const DEFAULT_TABSIZE = 8;
 
