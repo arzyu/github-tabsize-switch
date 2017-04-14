@@ -11,7 +11,8 @@ const setTabsize = (tabsize) => {
   .tab-size[data-tab-size='4'],
   .tab-size[data-tab-size='8'],
   .inline-review-comment,
-  .gist table.lines {
+  .gist table.lines,
+  .highlight > pre {
     tab-size: ${tabsize} !important;
   }
   `;
