@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Github tabsize switch",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Customize tabsize (2/4/8) on Github.",
   "icons": {
     "128": "assets/tabsize-8.png"
