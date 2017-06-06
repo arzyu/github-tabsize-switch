@@ -3,11 +3,18 @@ const runtime = chrome.runtime;
 const tabs = chrome.tabs;
 const browserAction = chrome.browserAction;
 
-const githubPattern = /^https:\/\/([^\.]+\.)*github\.com/;
 const tabsizeList = [2, 4, 8];
 const DEFAULT_TABSIZE = 8;
 
 let currentTabsize;
+
+const isGithub = (url) => {
+  const githubPatterns = [
+    /^https:\/\/([^\.]+\.)*github\.com/,
+    /^https:\/\/github\./
+  ];
+  return githubPatterns.some(regex => regex.test(url));
+};
 
 const setIcon = (tabsize) => {
   browserAction.setIcon({path: `assets/tabsize-${tabsize}.png`});
@@ -21,7 +28,7 @@ browserAction.onClicked.addListener((tab) => {
   setIcon(tabsize);
 
   // need permission: `activeTab` for tab.url
-  if (githubPattern.test(tab.url)) {
+  if (isGithub(tab.url)) {
     tabs.connect(tab.id).postMessage(tabsize);
   }
 
@@ -33,7 +40,7 @@ browserAction.onClicked.addListener((tab) => {
 tabs.onActivated.addListener((activeInfo) => {
   tabs.get(activeInfo.tabId, (tab) => {
     // need permission: `activeTab` for tab.url
-    if (githubPattern.test(tab.url)) {
+    if (isGithub(tab.url)) {
       tabs.connect(tab.id).postMessage(currentTabsize);
     }
   });
@@ -68,7 +75,7 @@ storage.onChanged.addListener((changes, area) => {
     tabs.query({active: true}, (matchedTabs) => {
       matchedTabs.forEach((tab) => {
         // need permission `tabs` for tab.url
-        if (tab && githubPattern.test(tab.url)) {
+        if (tab && isGithub(tab.url)) {
           tabs.connect(tab.id).postMessage(newTabsize);
         }
       });
@@ -90,4 +97,3 @@ storage.local.get('tabsize', (data) => {
   currentTabsize = tabsize;
   setIcon(tabsize);
 });
-

@@ -16,8 +16,11 @@
   "content_scripts": [
     {
       "matches": [
-        "https://github.com/*",
-        "https://*.github.com/*"
+        "https://*/*"
+      ],
+      "include_globs": [
+        "https://github.*",
+        "https://*.github.*"
       ],
       "js": ["content.js"],
       "run_at": "document_end",
@@ -26,4 +29,3 @@
   ],
   "permissions": ["tabs", "activeTab", "storage"]
 }
-
